@@ -1,6 +1,6 @@
 import pytest
 
-from balanced_fuzzy_negations import (
+from balanced_fuzzy_sets.balanced_fuzzy_negations import (
     balanced_reversal,
     cosine,
     cube,

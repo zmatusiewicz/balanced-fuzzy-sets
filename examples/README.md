@@ -2,7 +2,7 @@
 
 This directory is separate from the installable library in `src/`.
 
-- `main.py` runs the complete demonstration.
+- `main_example.py` runs the complete demonstration.
 - `data/rules/` contains example rules in compact prefix notation.
 - `data/process_steps/` contains consecutive example process stages.
 - `data/transition_scenarios/` contains independent example scenarios.
@@ -11,7 +11,7 @@ This directory is separate from the installable library in `src/`.
 Run the demonstration from the repository root:
 
 ```bash
-python examples/main.py
+python examples/main_example.py
 ```
 
 The script reads only from `data/` and writes its artifacts to `generated/`.

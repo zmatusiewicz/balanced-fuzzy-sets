@@ -17,10 +17,12 @@ continuous interval.
 
 ## Installation
 
-Create or activate a Python environment, then install the required libraries:
+Python 3.10 through 3.14 is supported.
+
+Create or activate a Python environment, then install the package:
 
 ```bash
-pip install -r requirements.txt
+pip install -e .
 ```
 
 The current requirements are:
@@ -28,14 +30,41 @@ The current requirements are:
 - `numpy`
 - `matplotlib`
 
+Development tools, including the test runner, can be installed with:
+
+```bash
+pip install -e ".[dev]"
+```
+
+The most commonly used classes and operations are available from the public
+package API. Factory families with overlapping names are grouped in submodules:
+
+```python
+from balanced_fuzzy_sets import BalancedFuzzyOperators, build_rule
+from balanced_fuzzy_sets import fuzzy_negations, tnorm_additive_generators
+```
+
 Run the complete example:
 
 ```bash
-python main.py
+python examples/main_example.py
 ```
 
-Generated plots, CSV tables, and transition summaries are written to
-`graphical_examples`.
+The demonstration reads its input from `examples/data` and writes plots, CSV
+tables, and transition summaries to `examples/generated`.
+
+## API Documentation
+
+The API reference is generated from the package docstrings with Sphinx. Build
+it locally with:
+
+```bash
+pip install -e ".[docs]"
+sphinx-build -W --keep-going -b html docs docs/_build/html
+```
+
+Open `docs/_build/html/index.html` to browse the generated documentation. The
+source files are in `docs`, starting with `docs/api.rst`.
 
 ## Core Concepts
 
@@ -89,8 +118,8 @@ cannot be confirmed by grid sampling, so the metadata is `unknown`, not `True`.
 ### Balanced Negation From a Classical Fuzzy Negation
 
 ```python
-from balanced_fuzzy_operators import BalancedFuzzyOperators
-from fuzzy_negations import cosine
+from balanced_fuzzy_sets import BalancedFuzzyOperators
+from balanced_fuzzy_sets.fuzzy_negations import cosine
 
 fuzzy_negation = cosine()
 
@@ -116,8 +145,8 @@ print(balanced_negation.guarantee)
 ### Balanced T-Norm From a Classical T-Norm
 
 ```python
-from balanced_fuzzy_operators import BalancedFuzzyOperators
-from tnorm_additive_generators import aczel_alsina
+from balanced_fuzzy_sets import BalancedFuzzyOperators
+from balanced_fuzzy_sets.tnorm_additive_generators import aczel_alsina
 
 generator = aczel_alsina(3.0)
 balanced_t_norm = BalancedFuzzyOperators.balanced_t_norm_from_t_norm(
@@ -165,11 +194,11 @@ returning a callable labelled as a balanced t-norm.
 ### Balanced T-Conorm From a Representable Uninorm
 
 ```python
-from balanced_fuzzy_operators import BalancedFuzzyOperators
-from representable_uninorm_generator import (
+from balanced_fuzzy_sets import (
+    BalancedFuzzyOperators,
     additive_generator_of_representable_uninorm,
 )
-from tnorm_additive_generators import aczel_alsina
+from balanced_fuzzy_sets.tnorm_additive_generators import aczel_alsina
 
 generator = aczel_alsina(3.0)
 uninorm_generator = additive_generator_of_representable_uninorm(generator, e=0.5)
@@ -205,9 +234,11 @@ callable metadata.
 ### Balanced T-Norm From a Nullnorm
 
 ```python
-from balanced_fuzzy_operators import BalancedFuzzyOperators
-from nullnorms import nullnorm_from_t_norm_and_t_conorm
-from tnorm_additive_generators import aczel_alsina
+from balanced_fuzzy_sets import (
+    BalancedFuzzyOperators,
+    nullnorm_from_t_norm_and_t_conorm,
+)
+from balanced_fuzzy_sets.tnorm_additive_generators import aczel_alsina
 
 generator = aczel_alsina(3.0)
 nullnorm = nullnorm_from_t_norm_and_t_conorm(generator.t_norm, z=0.5)
@@ -228,8 +259,8 @@ performs the full balanced t-norm grid check after transport.
 
 ## Evaluating Composite Fuzzy Expressions
 
-Rules are stored in compact prefix notation in the `rules` directory. Operator
-symbols are:
+Demonstration rules are stored in compact prefix notation in
+`examples/data/rules`. Operator symbols are:
 
 - `N` - unary balanced fuzzy negation,
 - `R` - unary supplementary operator,
@@ -251,14 +282,15 @@ S(T(x, N(x)), R(x))
 Build and evaluate a rule:
 
 ```python
-from balanced_fuzzy_operators import BalancedFuzzyOperators
-from fuzzy_negations import cosine
-from representable_uninorm_generator import (
+from balanced_fuzzy_sets import (
+    BalancedFuzzyOperators,
     additive_generator_of_representable_uninorm,
+    build_rule,
+    rule_to_infix,
 )
-from rule_builder import build_rule, rule_to_infix
-from supplementary_operators import cosine_supplementary_operator
-from tnorm_additive_generators import aczel_alsina
+from balanced_fuzzy_sets.fuzzy_negations import cosine
+from balanced_fuzzy_sets.supplementary_operators import cosine_supplementary_operator
+from balanced_fuzzy_sets.tnorm_additive_generators import aczel_alsina
 
 generator = aczel_alsina(3.0)
 uninorm_generator = additive_generator_of_representable_uninorm(generator, e=0.5)
@@ -303,13 +335,13 @@ missing variables. This avoids silently accepting malformed expressions.
 
 ## Saving Rule Value Tables
 
-`main.py` includes `save_rule_table(...)`, which evaluates a two-variable rule
-for `x,y` from `-1` to `1` with a chosen step:
+`examples/main_example.py` includes `save_rule_table(...)`, which evaluates a
+two-variable rule for `x,y` from `-1` to `1` with a chosen step:
 
 ```python
 from pathlib import Path
 
-save_rule_table(rule_surface, Path("graphical_examples/rule_values.csv"), step=0.1)
+save_rule_table(rule_surface, Path("examples/generated/rule_values.csv"), step=0.1)
 ```
 
 The output CSV has columns:
@@ -320,7 +352,7 @@ x,y,rule_value
 
 ## Visualizing Operators and Rules
 
-The `graphical_representation.py` module contains plotting helpers:
+The `balanced_fuzzy_sets.graphical_representation` module contains plotting helpers:
 
 - `plot_unary_operator_2d(...)` - for negations and other unary functions,
 - `plot_supplementary_operator(...)` - for supplementary operators,
@@ -330,7 +362,7 @@ The `graphical_representation.py` module contains plotting helpers:
 Example:
 
 ```python
-from graphical_representation import (
+from balanced_fuzzy_sets import (
     plot_balanced_binary_operator,
     plot_supplementary_operator,
     plot_unary_operator_2d,
@@ -338,7 +370,7 @@ from graphical_representation import (
 
 plot_balanced_binary_operator(
     balanced_t_norm,
-    save_path="graphical_examples/balanced_t_norm.png",
+    save_path="examples/generated/balanced_t_norm.png",
 )
 
 plot_unary_operator_2d(
@@ -346,12 +378,12 @@ plot_unary_operator_2d(
     domain=(-1.0, 1.0),
     title=balanced_negation.name,
     y_label="N_B(x)",
-    save_path="graphical_examples/balanced_negation.png",
+    save_path="examples/generated/balanced_negation.png",
 )
 
 plot_supplementary_operator(
     supplementary,
-    save_path="graphical_examples/supplementary_operator.png",
+    save_path="examples/generated/supplementary_operator.png",
 )
 ```
 
@@ -359,7 +391,8 @@ The plotting code avoids drawing lines through detected discontinuity points.
 
 ## Visualizing an Analysis Process
 
-Process steps are stored in `process_steps`. A step file has this format:
+Demonstration process steps are stored in `examples/data/process_steps`. A step
+file has this format:
 
 ```text
 Stage1. x1=0.5, x2=0.7, x3=-0.2; 1: x1:=Rule1(x1); 2: x2:=Rule2(x2,x1,x3)
@@ -380,7 +413,7 @@ Build and draw a Petri-inspired transition graph:
 
 ```python
 from pathlib import Path
-from petri_inspired_network import (
+from balanced_fuzzy_sets import (
     build_petri_inspired_network_from_process_steps,
     draw_petri_inspired_network,
     petri_inspired_network_summary,
@@ -388,9 +421,9 @@ from petri_inspired_network import (
 
 network = build_petri_inspired_network_from_process_steps(
     [
-        Path("process_steps") / "Step1",
-        Path("process_steps") / "Step2",
-        Path("process_steps") / "Step3",
+        Path("examples/data/process_steps") / "Step1",
+        Path("examples/data/process_steps") / "Step2",
+        Path("examples/data/process_steps") / "Step3",
     ],
     {
         "T": balanced_t_norm,
@@ -398,12 +431,13 @@ network = build_petri_inspired_network_from_process_steps(
         "N": balanced_negation,
         "R": supplementary,
     },
+    rules_dir=Path("examples/data/rules"),
     stage_name="Three-step Petri-inspired transition graph",
 )
 
 draw_petri_inspired_network(
     network,
-    save_path="graphical_examples/petri_inspired_3_steps.png",
+    save_path="examples/generated/petri_inspired_3_steps.png",
 )
 
 print(petri_inspired_network_summary(network))
@@ -420,7 +454,7 @@ direct place-to-place edges.
 
 ## Module Reference
 
-### `balanced_fuzzy_operators.py`
+### `balanced_fuzzy_sets.balanced_fuzzy_operators`
 
 Factory class for balanced operators. It contains constructors for:
 
@@ -440,7 +474,7 @@ transport checks such as `u(n(x))=-u(x)`, and full balanced t-norm grid checks
 where appropriate. A callable is not accepted as a balanced operator merely
 because it has the right Python signature.
 
-### `balanced_fuzzy_negations.py`
+### `balanced_fuzzy_sets.balanced_fuzzy_negations`
 
 Defines:
 
@@ -451,7 +485,7 @@ Defines:
 
 The class separates base balanced negation, strictness, and strength.
 
-### `fuzzy_negations.py`
+### `balanced_fuzzy_sets.fuzzy_negations`
 
 Defines:
 
@@ -467,7 +501,7 @@ Defines:
 - generated strong negation constructor,
 - intuitionistic and greatest pointwise negations.
 
-### `fuzzy_norms.py`
+### `balanced_fuzzy_sets.fuzzy_norms`
 
 Defines:
 
@@ -478,7 +512,7 @@ Defines:
 - dual construction methods,
 - factory dictionaries for known t-norms and t-conorms.
 
-### `tnorm_additive_generators.py`
+### `balanced_fuzzy_sets.tnorm_additive_generators`
 
 Defines additive generators and inverse or pseudo-inverse functions for:
 
@@ -496,7 +530,7 @@ Defines additive generators and inverse or pseudo-inverse functions for:
 The module uses stable numerical forms such as `expm1` and `log1p` for sensitive
 parameter ranges.
 
-### `representable_uninorm_generator.py`
+### `balanced_fuzzy_sets.representable_uninorm_generator`
 
 Defines:
 
@@ -506,7 +540,7 @@ Defines:
 It constructs a representable uninorm generator from a strict t-norm additive
 generator and neutral element `e`.
 
-### `nullnorms.py`
+### `balanced_fuzzy_sets.nullnorms`
 
 Defines:
 
@@ -516,7 +550,7 @@ Defines:
 - `transport_nullnorm(...)`,
 - `balanced_t_norm_from_nullnorm(...)`.
 
-### `supplementary_operators.py`
+### `balanced_fuzzy_sets.supplementary_operators`
 
 Defines:
 
@@ -525,7 +559,7 @@ Defines:
 - known supplementary operator factories based on standard, Yager, Sugeno,
   power, root, and cosine negations.
 
-### `rule_builder.py`
+### `balanced_fuzzy_sets.rule_builder`
 
 Defines a parser and evaluator for compact prefix-notation rules. It provides:
 
@@ -535,7 +569,7 @@ Defines a parser and evaluator for compact prefix-notation rules. It provides:
 - callable rule construction,
 - strict variable and operator validation.
 
-### `transition_analysis.py`
+### `balanced_fuzzy_sets.transition_analysis`
 
 Defines:
 
@@ -547,7 +581,7 @@ Defines:
 - multi-stage evaluation,
 - result formatting.
 
-### `petri_inspired_network.py`
+### `balanced_fuzzy_sets.petri_inspired_network`
 
 Defines:
 
@@ -559,12 +593,12 @@ Defines:
 - drawing functions,
 - text summary functions.
 
-### `graphical_representation.py`
+### `balanced_fuzzy_sets.graphical_representation`
 
 Defines plotting functions for unary and binary fuzzy operators, including
 balanced-domain plots and discontinuity-aware rendering.
 
-### `operator_guarantees.py`
+### `balanced_fuzzy_sets.operator_guarantees`
 
 Defines guarantee labels and helpers used by operator objects:
 
@@ -575,7 +609,7 @@ Defines guarantee labels and helpers used by operator objects:
 - `normalize_guarantee(...)`,
 - `attach_guarantee(...)`.
 
-### `main.py`
+### `examples/main_example.py`
 
 Executable example that combines the project features:
 
@@ -590,7 +624,8 @@ Executable example that combines the project features:
 
 ## Project Directories
 
-- `rules` - compact prefix-notation rule files `Rule1` through `Rule10`,
-- `process_steps` - staged process files `Step1` through `Step4`,
-- `transition_scenarios` - independent scenario files,
-- `graphical_examples` - generated plots, CSV files, and text summaries.
+- `examples/data/rules` - demonstration rule files `Rule1` through `Rule10`,
+- `examples/data/process_steps` - demonstration process files `Step1` through
+  `Step4`,
+- `examples/data/transition_scenarios` - independent demonstration scenarios,
+- `examples/generated` - generated plots, CSV files, and text summaries.

@@ -19,7 +19,7 @@ grids. It is not a proof of monotonicity, associativity, commutativity, or
 involutivity on a continuous interval. The old name `verified_properties`
 remains only as a backward-compatible alias.
 
-## `balanced_fuzzy_operators.py`
+## `balanced_fuzzy_sets.balanced_fuzzy_operators`
 
 Central factory module for balanced fuzzy operations. It defines
 `BalancedFuzzyOperators`, with constructors for balanced fuzzy negations,
@@ -75,7 +75,7 @@ u(n(x))=-u(x)
 The returned callable records this as
 `empirically_uninorm_generator_antisymmetric_on_grid`.
 
-## `balanced_fuzzy_negations.py`
+## `balanced_fuzzy_sets.balanced_fuzzy_negations`
 
 Defines `BalancedFuzzyNegation` and example balanced fuzzy negations from the
 paper table.
@@ -103,7 +103,7 @@ confirmed property solely from grid sampling. A function with jumps can be
 injective on the grid and still skip whole value intervals, so its surjectivity
 status remains `unknown`.
 
-## `fuzzy_negations.py`
+## `balanced_fuzzy_sets.fuzzy_negations`
 
 Contains classical fuzzy negations `n:[0,1]->[0,1]`: standard, Yager, Sugeno,
 power, complement-power, root-complement, complement-root, cosine, exponential,
@@ -114,7 +114,7 @@ decreasing behavior on a grid, strict decrease on a grid, and involutivity on a
 grid. Output values outside `[0,1]` beyond numerical tolerance raise an error
 instead of being silently clipped.
 
-## `fuzzy_norms.py`
+## `balanced_fuzzy_sets.fuzzy_norms`
 
 Defines `TNorm`, `TConorm`, and `FuzzyNormProperties`. Implemented families
 include minimum/maximum, product/probabilistic sum, Lukasiewicz, drastic,
@@ -125,7 +125,7 @@ Known families and dual constructions are marked as `guarantee="by construction"
 Arbitrary supplied functions are marked as `numerically sampled` when validation
 is enabled or `user supplied, unchecked` when `validate=False`.
 
-## `supplementary_operators.py`
+## `balanced_fuzzy_sets.supplementary_operators`
 
 Defines supplementary operators `I:[-1,1]->[-1,1]`, usually induced by a
 classical fuzzy negation:
@@ -134,7 +134,7 @@ classical fuzzy negation:
 I(x)=n(x) for x>0, I(x)=-n(-x) for x<0, I(0)=0
 ```
 
-## `tnorm_additive_generators.py`
+## `balanced_fuzzy_sets.tnorm_additive_generators`
 
 Defines additive generators for t-norms and literature families: Lukasiewicz,
 product, drastic, Schweizer-Sklar, Hamacher, Frank, Yager, Aczel-Alsina, Dombi,
@@ -144,14 +144,14 @@ and Sugeno-Weber.
 `numerically_checked_properties`. Known generator families are marked
 `guarantee="by construction"`.
 
-## `representable_uninorm_generator.py`
+## `balanced_fuzzy_sets.representable_uninorm_generator`
 
 Builds an additive generator of a representable uninorm from a strict t-norm
 additive generator and a neutral element `e`. It provides
 `additive_generator_of_representable_uninorm(...)` and methods for evaluating
 the generator, inverse, and uninorm.
 
-## `nullnorms.py`
+## `balanced_fuzzy_sets.nullnorms`
 
 Defines `Nullnorm` for operations `V:[0,1]^2->[0,1]` with zero element `z`.
 It provides:
@@ -163,7 +163,7 @@ It provides:
 The general transport does not claim balanced symmetry. The balanced t-norm
 construction adds the full balanced t-norm grid check after transport.
 
-## `rule_builder.py`
+## `balanced_fuzzy_sets.rule_builder`
 
 Parser for compact prefix-notation rules. Operator symbols:
 
@@ -175,7 +175,7 @@ Parser for compact prefix-notation rules. Operator symbols:
 Unknown uppercase symbols are rejected as invalid operators. Extra arguments are
 not ignored.
 
-## `transition_analysis.py`
+## `balanced_fuzzy_sets.transition_analysis`
 
 Parser and evaluator for staged transition analysis. Stage file format:
 
@@ -186,7 +186,7 @@ Stage1. x1=0.5, x2=0.7, x3=-0.2; 1: x1:=Rule1(x1); 2: x2:=Rule2(x2,x1,x3)
 Rules have priorities and are executed from priority `1` upward. A rule result
 updates the explicitly named output place on the left side of `:=`.
 
-## `petri_inspired_network.py`
+## `balanced_fuzzy_sets.petri_inspired_network`
 
 Builds and draws a Petri-inspired transition graph. It is not a full formal
 implementation of Petri-net semantics. Places are drawn as circles and
@@ -199,7 +199,7 @@ xk(1) -> rule transition -> xk(2) -> next rule transition -> xk(3)
 There are no direct place-to-place edges. Every value update goes through a
 transition corresponding to the fired rule.
 
-## `graphical_representation.py`
+## `balanced_fuzzy_sets.graphical_representation`
 
 Plotting utilities for:
 
@@ -210,29 +210,31 @@ Plotting utilities for:
 
 ## Main Script
 
-`main.py` currently:
+`examples/main_example.py` currently:
 
 1. Selects the Aczel-Alsina additive generator with `p=3`.
 2. Builds a representable uninorm with neutral element `e=0.5`.
 3. Builds balanced t-norms and balanced t-conorms.
 4. Builds a balanced negation and supplementary operator from the cosine fuzzy
    negation.
-5. Loads `rules/Rule1`, builds the rule, and plots it.
+5. Loads `examples/data/rules/Rule1`, builds the rule, and plots it.
 6. Saves a rule-value table for `x,y` from `-1` to `1` with step `0.1`.
 7. Builds a three-step Petri-inspired transition graph from files in
-   `process_steps`.
-8. Saves plots and summaries in `graphical_examples`.
+   `examples/data/process_steps`.
+8. Saves plots and summaries in `examples/generated`.
 
 ## Data Directories
 
-`rules` contains `Rule1` through `Rule10`, written in compact prefix notation.
+`examples/data/rules` contains `Rule1` through `Rule10`, written in compact
+prefix notation.
 
-`process_steps` contains `Step1` through `Step4`. Each file describes initial
-place values and priority-ordered rule calls for one process step.
+`examples/data/process_steps` contains `Step1` through `Step4`. Each file
+describes initial place values and priority-ordered rule calls for one process
+step.
 
-`transition_scenarios` contains independent `Scenario1` through `Scenario4`.
-Each scenario has its own initial values and is not treated as a continuation of
-the previous file.
+`examples/data/transition_scenarios` contains independent `Scenario1` through
+`Scenario4`. Each scenario has its own initial values and is not treated as a
+continuation of the previous file.
 
-`graphical_examples` contains generated plots, the rule-value CSV table, and the
-Petri-inspired transition graph summary.
+`examples/generated` contains generated plots, the rule-value CSV table, and
+the Petri-inspired transition graph summary.

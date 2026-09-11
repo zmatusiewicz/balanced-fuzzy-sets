@@ -67,7 +67,7 @@ def test_known_negations_reverse_sign(negation_factory):
     negation = negation_factory()
 
     for x in [-1.0, -0.5, 0.0, 0.5, 1.0]:
-        assert x * negation(x) <= pytest.approx(0.0, abs=1e-12)
+        assert x * negation(x) <= 1e-12
 
 
 @pytest.mark.parametrize(

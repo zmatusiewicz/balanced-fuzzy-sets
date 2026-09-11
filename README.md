@@ -66,6 +66,11 @@ sphinx-build -W --keep-going -b html docs docs/_build/html
 Open `docs/_build/html/index.html` to browse the generated documentation. The
 source files are in `docs`, starting with `docs/api.rst`.
 
+The repository includes `.readthedocs.yaml` for hosted builds. After importing
+the GitHub repository into Read the Docs, the service installs the package with
+the `docs` extra, builds `docs/conf.py`, and rejects builds containing Sphinx
+warnings.
+
 ## Core Concepts
 
 ### Guarantee Metadata

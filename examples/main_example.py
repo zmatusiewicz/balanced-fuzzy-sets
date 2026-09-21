@@ -17,6 +17,7 @@ from balanced_fuzzy_sets import (
     petri_inspired_network_summary,
     plot_balanced_binary_operator,
     plot_binary_operator_3d,
+    plot_rule_tree,
     plot_supplementary_operator,
     plot_unary_operator_2d,
     rule_to_infix,
@@ -126,16 +127,15 @@ if __name__ == "__main__":
     supplementary = cosine_supplementary_operator()
 
     rule_code = RULE_PATH.read_text(encoding="utf-8").strip()
-    rule = build_rule(
-        rule_code,
-        {
-            "T": balanced_t_norm,
-            "S": balanced_t_conorm_one,
-            "N": balanced_negation,
-            "R": supplementary,
-        },
-    )
-    rule_variables = parse_rule(rule_code).variables()
+    rule_node = parse_rule(rule_code)
+    rule_operators = {
+        "T": balanced_t_norm,
+        "S": balanced_t_conorm_one,
+        "N": balanced_negation,
+        "R": supplementary,
+    }
+    rule = build_rule(rule_code, rule_operators)
+    rule_variables = rule_node.variables()
     rule_surface = lambda x, y: rule(
         **{
             variable: {"x": x, "y": y}[variable]
@@ -179,6 +179,13 @@ if __name__ == "__main__":
             rule_surface,
             save_path=OUTPUT_DIR / "rule_Rule1.png",
         ),
+        plot_rule_tree(
+            rule_node,
+            {"x": 0.4},
+            rule_operators,
+            show_values=True,
+            save_path=OUTPUT_DIR / "rule_Rule1_tree.png",
+        ),
     ]
     for figure in figures:
         plt.close(figure)
@@ -191,12 +198,7 @@ if __name__ == "__main__":
             DATA_DIR / "process_steps" / "Step2",
             DATA_DIR / "process_steps" / "Step3",
         ],
-        {
-            "T": balanced_t_norm,
-            "S": balanced_t_conorm_one,
-            "N": balanced_negation,
-            "R": supplementary,
-        },
+        rule_operators,
         rules_dir=RULES_DIR,
         stage_name="Three-step Petri-inspired transition graph",
     )

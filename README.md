@@ -291,6 +291,7 @@ from balanced_fuzzy_sets import (
     BalancedFuzzyOperators,
     additive_generator_of_representable_uninorm,
     build_rule,
+    parse_rule,
     rule_to_infix,
 )
 from balanced_fuzzy_sets.fuzzy_negations import cosine
@@ -321,15 +322,14 @@ balanced_negation = (
 supplementary = cosine_supplementary_operator()
 
 rule_code = "STxNxRx"
-rule = build_rule(
-    rule_code,
-    {
-        "T": balanced_t_norm,
-        "S": balanced_t_conorm,
-        "N": balanced_negation,
-        "R": supplementary,
-    },
-)
+operators = {
+    "T": balanced_t_norm,
+    "S": balanced_t_conorm,
+    "N": balanced_negation,
+    "R": supplementary,
+}
+rule_node = parse_rule(rule_code)
+rule = build_rule(rule_code, operators)
 
 print(rule_to_infix(rule_code))
 print(rule(x=0.4))
@@ -337,6 +337,21 @@ print(rule(x=0.4))
 
 The parser rejects unknown uppercase symbols and rejects calls with extra or
 missing variables. This avoids silently accepting malformed expressions.
+
+`RuleNode.evaluate_with_trace(...)` evaluates the same tree while retaining
+the result of every variable and operator occurrence. It returns the final
+value and a recursive `RuleEvaluationTrace` whose `node`, `value`, and
+`children` fields mirror the parsed rule tree:
+
+```python
+value, trace = rule_node.evaluate_with_trace({"x": 0.4}, operators)
+
+assert trace.node is rule_node
+assert trace.value == value
+```
+
+Each occurrence gets its own trace node. This is important for rules such as
+`STxNxRx`, in which `x` occurs three times.
 
 ## Saving Rule Value Tables
 
@@ -364,13 +379,15 @@ A detailed manual is available in [`docs/manual.rst`](docs/manual.rst).
 - `plot_unary_operator_2d(...)` - for negations and other unary functions,
 - `plot_supplementary_operator(...)` - for supplementary operators,
 - `plot_binary_operator_3d(...)` - for classical binary operators on `[0,1]`,
-- `plot_balanced_binary_operator(...)` - for binary operators on `[-1,1]`.
+- `plot_balanced_binary_operator(...)` - for binary operators on `[-1,1]`,
+- `plot_rule_tree(...)` - for parsed rule trees and intermediate values.
 
 Example:
 
 ```python
 from balanced_fuzzy_sets import (
     plot_balanced_binary_operator,
+    plot_rule_tree,
     plot_supplementary_operator,
     plot_unary_operator_2d,
 )
@@ -392,9 +409,25 @@ plot_supplementary_operator(
     supplementary,
     save_path="examples/generated/supplementary_operator.png",
 )
+
+plot_rule_tree(
+    rule_node,
+    {"x": 0.4},
+    operators,
+    show_values=True,
+    save_path="examples/generated/rule_Rule1_tree.png",
+)
 ```
 
-The plotting code avoids drawing lines through detected discontinuity points.
+Generated `Rule1` tree:
+
+![Rule1 evaluation tree](examples/generated/rule_Rule1_tree.png)
+
+`plot_rule_tree` delegates all calculations to
+`RuleNode.evaluate_with_trace(...)`; the graphical module only lays out and
+renders the returned trace. Set `show_values=False` to draw symbols without
+numeric values. The other plotting helpers avoid drawing lines through declared
+discontinuity points.
 
 ## Visualizing an Analysis Process
 
@@ -603,7 +636,7 @@ Defines:
 ### `balanced_fuzzy_sets.graphical_representation`
 
 Defines plotting functions for unary and binary fuzzy operators, including
-balanced-domain plots and discontinuity-aware rendering.
+balanced-domain plots, discontinuity-aware rendering, and evaluated rule trees.
 
 ### `balanced_fuzzy_sets.operator_guarantees`
 

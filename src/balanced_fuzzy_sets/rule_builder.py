@@ -54,8 +54,15 @@ class RuleNode:
     ) -> float:
         """Evaluate the rule for given variable values and operator functions."""
 
-        value, _ = self._evaluate(variables, operators, capture_trace=False)
-        return value
+        if self.is_variable:
+            return variables[self.symbol]
+
+        if self.symbol not in operators:
+            raise KeyError(f"Missing operator implementation for {self.symbol!r}.")
+
+        values = [child.evaluate(variables, operators) for child in self.children]
+        function = operators[self.symbol]
+        return function(*values)
 
     def evaluate_with_trace(
         self,
@@ -64,23 +71,9 @@ class RuleNode:
     ) -> tuple[float, RuleEvaluationTrace]:
         """Evaluate the rule and return its value and full evaluation tree."""
 
-        value, trace = self._evaluate(variables, operators, capture_trace=True)
-        assert trace is not None
-        return value, trace
-
-    def _evaluate(
-        self,
-        variables: Mapping[str, float],
-        operators: Mapping[str, OperatorFunction],
-        *,
-        capture_trace: bool,
-    ) -> tuple[float, RuleEvaluationTrace | None]:
-        """Evaluate once, optionally retaining every intermediate result."""
-
         if self.is_variable:
             value = variables[self.symbol]
-            trace = RuleEvaluationTrace(self, value) if capture_trace else None
-            return value, trace
+            return value, RuleEvaluationTrace(self, value)
 
         if self.symbol not in operators:
             raise KeyError(f"Missing operator implementation for {self.symbol!r}.")
@@ -88,23 +81,13 @@ class RuleNode:
         values = []
         child_traces = []
         for child in self.children:
-            child_value, child_trace = child._evaluate(
-                variables,
-                operators,
-                capture_trace=capture_trace,
-            )
+            child_value, child_trace = child.evaluate_with_trace(variables, operators)
             values.append(child_value)
-            if child_trace is not None:
-                child_traces.append(child_trace)
+            child_traces.append(child_trace)
 
         function = operators[self.symbol]
         value = function(*values)
-        trace = (
-            RuleEvaluationTrace(self, value, tuple(child_traces))
-            if capture_trace
-            else None
-        )
-        return value, trace
+        return value, RuleEvaluationTrace(self, value, tuple(child_traces))
 
 
 @dataclass(frozen=True)

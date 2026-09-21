@@ -1,4 +1,4 @@
-"""Plotting helpers for fuzzy and balanced fuzzy operators."""
+"""Plotting helpers for fuzzy operators and evaluated rule trees."""
 
 from __future__ import annotations
 

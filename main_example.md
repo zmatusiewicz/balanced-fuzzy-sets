@@ -206,6 +206,7 @@ Plotting utilities for:
 - negations and supplementary operators as 2D functions,
 - t-norms, t-conorms, binary balanced operators, and binary rules as 3D
   surfaces,
+- parsed rule trees with values for variables and intermediate operator calls,
 - discontinuity-aware plotting that avoids connecting discontinuity points.
 
 ## Example Script
@@ -217,7 +218,8 @@ Plotting utilities for:
 3. Builds balanced t-norms and balanced t-conorms.
 4. Builds a balanced negation and supplementary operator from the cosine fuzzy
    negation.
-5. Loads `examples/data/rules/Rule1`, builds the rule, and plots it.
+5. Loads `examples/data/rules/Rule1`, builds the rule, and plots both its 3D
+   surface and its evaluated expression tree.
 6. Saves a rule-value table for `x,y` from `-1` to `1` with step `0.1`.
 7. Builds a three-step Petri-inspired transition graph from files in
    `examples/data/process_steps`.

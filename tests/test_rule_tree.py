@@ -11,14 +11,35 @@ from balanced_fuzzy_sets import (
     parse_rule,
     plot_rule_tree,
 )
+from balanced_fuzzy_sets.rule_builder import DEFAULT_ARITY
+
+
+def _t_norm(x, y):
+    return min(x, y)
+
+
+def _t_conorm(x, y):
+    return max(x, y)
+
+
+def _balanced_negation(x):
+    return -x
+
+
+def _supplementary_operator(x):
+    if x > 0.0:
+        return 1.0 - x
+    if x < 0.0:
+        return 1.0 + x
+    return 0.0
 
 
 def _operators():
     return {
-        "T": lambda x, y: x * y,
-        "S": lambda x, y: x + y,
-        "N": lambda x: 1.0 - x,
-        "R": lambda x: -x,
+        "T": _t_norm,
+        "S": _t_conorm,
+        "N": _balanced_negation,
+        "R": _supplementary_operator,
     }
 
 
@@ -37,19 +58,23 @@ def test_parser_recognizes_rule_tree():
     assert rule_node.variables() == {"x"}
 
 
+def test_default_symbols_have_the_documented_arities():
+    assert DEFAULT_ARITY == {"N": 1, "R": 1, "T": 2, "S": 2}
+
+
 def test_evaluate_with_trace_preserves_the_complete_rule_tree():
     rule_node = parse_rule("STxNxRx")
 
     result, trace = rule_node.evaluate_with_trace({"x": 0.4}, _operators())
 
-    assert result == pytest.approx(-0.16)
+    assert result == pytest.approx(0.6)
     assert trace.node is rule_node
     assert trace.value == pytest.approx(result)
     t_trace, r_trace = trace.children
-    assert t_trace.value == pytest.approx(0.24)
-    assert r_trace.value == pytest.approx(-0.4)
+    assert t_trace.value == pytest.approx(-0.4)
+    assert r_trace.value == pytest.approx(0.6)
     assert t_trace.children[1].node.symbol == "N"
-    assert t_trace.children[1].value == pytest.approx(0.6)
+    assert t_trace.children[1].value == pytest.approx(-0.4)
     assert [item.node.symbol for item in _walk_trace(trace)] == [
         "S",
         "T",
@@ -106,7 +131,7 @@ def test_plot_rule_tree_renders_every_occurrence_and_saves_the_figure(tmp_path):
         assert output_path.is_file()
         assert len(labels) == 7
         assert labels.count("x\n= 0.4") == 3
-        assert "S\n= -0.16" in labels
+        assert "S\n= 0.6" in labels
         assert len(figure.axes[0].lines) == 6
     finally:
         plt.close(figure)
@@ -124,10 +149,10 @@ def test_plot_rule_tree_evaluates_each_operator_once():
         return operator
 
     operators = {
-        "T": counted("T", lambda x, y: x * y),
-        "S": counted("S", lambda x, y: x + y),
-        "N": counted("N", lambda x: 1.0 - x),
-        "R": counted("R", lambda x: -x),
+        "T": counted("T", _t_norm),
+        "S": counted("S", _t_conorm),
+        "N": counted("N", _balanced_negation),
+        "R": counted("R", _supplementary_operator),
     }
 
     figure = plot_rule_tree(rule_node, {"x": 0.4}, operators)

@@ -410,9 +410,10 @@ plot_supplementary_operator(
     save_path="examples/generated/supplementary_operator.png",
 )
 
+example_values = {"x": 0.2}
 plot_rule_tree(
     rule_node,
-    {"x": 0.4},
+    example_values,
     operators,
     show_values=True,
     save_path="examples/generated/rule_Rule1_tree.png",

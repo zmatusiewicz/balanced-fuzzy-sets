@@ -134,6 +134,7 @@ if __name__ == "__main__":
         "N": balanced_negation,
         "R": supplementary,
     }
+    example_values = {"x": 0.2}
     rule = build_rule(rule_code, rule_operators)
     rule_variables = rule_node.variables()
     rule_surface = lambda x, y: rule(
@@ -181,7 +182,7 @@ if __name__ == "__main__":
         ),
         plot_rule_tree(
             rule_node,
-            {"x": 0.4},
+            example_values,
             rule_operators,
             show_values=True,
             save_path=OUTPUT_DIR / "rule_Rule1_tree.png",

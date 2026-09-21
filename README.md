@@ -359,6 +359,9 @@ x,y,rule_value
 
 The `balanced_fuzzy_sets.graphical_representation` module contains plotting helpers:
 
+A detailed Polish-language manual is available in
+[`docs/graphical_representation.rst`](docs/graphical_representation.rst).
+
 - `plot_unary_operator_2d(...)` - for negations and other unary functions,
 - `plot_supplementary_operator(...)` - for supplementary operators,
 - `plot_binary_operator_3d(...)` - for classical binary operators on `[0,1]`,

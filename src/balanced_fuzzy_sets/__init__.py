@@ -26,6 +26,7 @@ from .graphical_representation import (
     plot_balanced_binary_operator,
     plot_binary_operator_3d,
     plot_negation,
+    plot_rule_tree,
     plot_supplementary_operator,
     plot_t_conorm,
     plot_t_norm,
@@ -65,7 +66,14 @@ from .representable_uninorm_generator import (
     AdditiveGeneratorOfRepresentableUninorm,
     additive_generator_of_representable_uninorm,
 )
-from .rule_builder import RuleBuilder, RuleNode, build_rule, parse_rule, rule_to_infix
+from .rule_builder import (
+    RuleBuilder,
+    RuleEvaluationTrace,
+    RuleNode,
+    build_rule,
+    parse_rule,
+    rule_to_infix,
+)
 from .supplementary_operators import SupplementaryOperator
 from .tnorm_additive_generators import AdditiveGenerator, AdditiveGeneratorProperties
 from .transition_analysis import (
@@ -102,6 +110,7 @@ __all__ = [
     "PetriInspiredNetwork",
     "Place",
     "RuleBuilder",
+    "RuleEvaluationTrace",
     "RuleCall",
     "RuleNode",
     "RuleResult",
@@ -143,6 +152,7 @@ __all__ = [
     "plot_balanced_binary_operator",
     "plot_binary_operator_3d",
     "plot_negation",
+    "plot_rule_tree",
     "plot_supplementary_operator",
     "plot_t_conorm",
     "plot_t_norm",

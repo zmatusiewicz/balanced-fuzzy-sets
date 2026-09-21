@@ -2,13 +2,15 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable, Iterable, Sequence
+from collections.abc import Callable, Iterable, Mapping, Sequence
 from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
+
+from .rule_builder import OperatorFunction, RuleEvaluationTrace, RuleNode
 
 NumberFunction = Callable[[float], float]
 BinaryFunction = Callable[[float, float], float]
@@ -364,6 +366,104 @@ def plot_balanced_binary_operator(
         save_path=save_path,
         show=show,
     )
+
+
+def _rule_tree_layout(
+    trace: RuleEvaluationTrace,
+) -> tuple[
+    list[tuple[RuleEvaluationTrace, float, float]],
+    list[tuple[float, float, float, float]],
+    int,
+    int,
+]:
+    """Return positioned trace nodes, edges, leaf count, and maximum depth."""
+
+    positioned = []
+    edges = []
+    next_leaf_x = 0
+    maximum_depth = 0
+
+    def position_node(node_trace: RuleEvaluationTrace, depth: int) -> float:
+        nonlocal next_leaf_x, maximum_depth
+        maximum_depth = max(maximum_depth, depth)
+
+        child_positions = [
+            position_node(child_trace, depth + 1)
+            for child_trace in node_trace.children
+        ]
+        if child_positions:
+            x = sum(child_positions) / len(child_positions)
+        else:
+            x = float(next_leaf_x)
+            next_leaf_x += 1
+
+        y = -float(depth)
+        positioned.append((node_trace, x, y))
+        for child_x in child_positions:
+            edges.append((x, y, child_x, y - 1.0))
+        return x
+
+    position_node(trace, 0)
+    return positioned, edges, max(next_leaf_x, 1), maximum_depth
+
+
+def plot_rule_tree(
+    rule_node: RuleNode,
+    variables: Mapping[str, float],
+    operators: Mapping[str, OperatorFunction],
+    *,
+    show_values: bool = True,
+    title: str = "Rule evaluation tree",
+    save_path: str | Path | None = None,
+    show: bool = False,
+) -> Figure:
+    """Plot a rule tree using values produced by ``evaluate_with_trace``."""
+
+    _, trace = rule_node.evaluate_with_trace(variables, operators)
+    positioned, edges, leaf_count, maximum_depth = _rule_tree_layout(trace)
+
+    width = max(7.0, leaf_count * 1.7)
+    height = max(4.5, (maximum_depth + 1) * 1.45)
+    fig, ax = plt.subplots(figsize=(width, height))
+
+    for parent_x, parent_y, child_x, child_y in edges:
+        ax.plot(
+            [parent_x, child_x],
+            [parent_y, child_y],
+            color="#6b7280",
+            linewidth=1.4,
+            zorder=1,
+        )
+
+    for node_trace, x, y in positioned:
+        label = node_trace.node.symbol
+        if show_values:
+            label = f"{label}\n= {node_trace.value:.6g}"
+
+        is_variable = node_trace.node.is_variable
+        ax.text(
+            x,
+            y,
+            label,
+            horizontalalignment="center",
+            verticalalignment="center",
+            fontsize=10,
+            fontweight="bold" if not is_variable else "normal",
+            bbox={
+                "boxstyle": "round,pad=0.45",
+                "facecolor": "#dcfce7" if is_variable else "#dbeafe",
+                "edgecolor": "#15803d" if is_variable else "#1d4ed8",
+                "linewidth": 1.4,
+            },
+            zorder=2,
+        )
+
+    x_padding = 0.75 if leaf_count > 1 else 1.0
+    ax.set_xlim(-x_padding, max(leaf_count - 1, 0) + x_padding)
+    ax.set_ylim(-maximum_depth - 0.75, 0.75)
+    ax.set_title(title)
+    ax.axis("off")
+    return _finalize_figure(fig, save_path=save_path, show=show)
 
 
 def save_many_unary_plots(

@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 
 from balanced_fuzzy_sets import (
     RuleEvaluationTrace,
+    build_rule,
     parse_rule,
     plot_rule_tree,
 )
@@ -25,6 +26,15 @@ def _walk_trace(trace: RuleEvaluationTrace):
     yield trace
     for child in trace.children:
         yield from _walk_trace(child)
+
+
+def test_parser_recognizes_rule_tree():
+    rule_node = parse_rule("STxNxRx")
+
+    assert rule_node.symbol == "S"
+    assert [child.symbol for child in rule_node.children] == ["T", "R"]
+    assert rule_node.to_infix() == "S(T(x, N(x)), R(x))"
+    assert rule_node.variables() == {"x"}
 
 
 def test_evaluate_with_trace_preserves_the_complete_rule_tree():
@@ -56,16 +66,18 @@ def test_evaluate_with_trace_preserves_the_complete_rule_tree():
     assert all(item.value == pytest.approx(0.4) for item in x_traces)
 
 
-def test_evaluate_and_evaluate_with_trace_have_identical_results():
+def test_rule_callable_and_evaluate_with_trace_have_identical_results():
     rule_node = parse_rule("STxNxRx")
     variables = {"x": 0.4}
     operators = _operators()
+    rule = build_rule("STxNxRx", operators)
 
-    result = rule_node.evaluate(variables, operators)
+    normal_result = rule(**variables)
     traced_result, trace = rule_node.evaluate_with_trace(variables, operators)
 
-    assert traced_result == pytest.approx(result)
-    assert trace.value == pytest.approx(result)
+    assert traced_result == pytest.approx(normal_result)
+    assert trace.value == pytest.approx(normal_result)
+    assert trace.node.symbol == "S"
 
 
 def test_evaluate_with_trace_preserves_evaluation_errors():

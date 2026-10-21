@@ -374,7 +374,7 @@ x,y,rule_value
 
 The `balanced_fuzzy_sets.graphical_representation` module contains plotting helpers:
 
-A detailed manual is available in [`docs/manual.rst`](docs/manual.rst).
+Sphinx API documentation sources are available in [`docs/api.rst`](docs/api.rst).
 
 - `plot_unary_operator_2d(...)` - for negations and other unary functions,
 - `plot_supplementary_operator(...)` - for supplementary operators,

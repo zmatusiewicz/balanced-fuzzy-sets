@@ -38,5 +38,4 @@ families with overlapping names are available through their submodules.
    :maxdepth: 2
    :caption: Reference
 
-   manual
    api

@@ -112,7 +112,7 @@ def standard_supplementary_operator() -> SupplementaryOperator:
     return from_fuzzy_negation(
         standard(),
         name="Standard supplementary operator",
-        formula="I(x)=1-x for x>0; I(x)=x+1 for x<0; I(0)=0",
+        formula="I(x)=1-x for x>0; I(x)=-1-x for x<0; I(0)=0",
         reference_note="Supplementary operator induced by standard negation.",
     )
 
